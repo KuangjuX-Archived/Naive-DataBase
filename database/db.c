@@ -79,7 +79,6 @@ typedef struct {
     Row row_to_insert;
 }Statement;
 
-ssize_t getline(char **lineptr, size_t *n, FILE* stream);
 /**
  * lineptr : a pointer to the variable we use to point to the buffer containing the read line. If it set to NULL it is mallocatted by getline and should thus be freed by the user, even if the command fails.
  * n : a pointer to the variable we use to save the size of allocated buffer.
@@ -96,7 +95,7 @@ InputBuffer* new_input_buffer(){
 }
 
 void read_input(InputBuffer* input_buffer){
-    ssize_t bytes_read = getline(&(input_buffer),&(input_buffer->buffer_length),stdin);
+    ssize_t bytes_read = getline(&(input_buffer->buffer),&(input_buffer->buffer_length),stdin);
     if(bytes_read <= 0){
         printf("Error reading input\n");
         exit(EXIT_FAILURE);
@@ -238,7 +237,7 @@ int main(int argc, char* argv[]){
     while(true){
         print_prompt();
         read_input(input_buffer);
-
+        printf("%d\n",input_buffer->buffer_length);
         if(input_buffer->buffer[0] == '.'){
             switch (do_meta_command(input_buffer)){
                 case (META_COMMAND_SUCCESS):

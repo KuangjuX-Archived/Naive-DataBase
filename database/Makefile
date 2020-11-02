@@ -1,5 +1,5 @@
 pi:db.c
-	gcc -o db db.c
+	gcc db.c -o db -g
 .PHONY:cleanrun
 clean:
 	rm -rf db
