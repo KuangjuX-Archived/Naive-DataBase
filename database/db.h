@@ -17,8 +17,8 @@
 #define COLUMN_EMAIL_SIZE 255
 typedef struct{
     uint32_t id;
-    char username[COLUMN_USERNAME_SIZE];
-    char email[COLUMN_EMAIL_SIZE];
+    char username[COLUMN_USERNAME_SIZE + 1];
+    char email[COLUMN_EMAIL_SIZE + 1];
 } Row;
 
 //define the compact representation of a row
@@ -64,6 +64,8 @@ typedef enum{
 
 typedef enum{
     PREPARE_SUCCESS,
+    PREPARE_NEGATIVE_ID,
+    PREPARE_STRING_TOO_LONG,
     PREPARE_SYNTAX_ERROR,
     PREPARE_UNRECOGNIZED_STATEMENT
 } PrepareResult;
@@ -90,6 +92,8 @@ void print_prompt();
 void print_row(Row* row);
 
 MetaCommandResult do_meta_command(InputBuffer* input_buffer);
+
+PrepareResult prepare_insert(InputBuffer* input_buffer, Statement* statement);
 
 PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement);
 
