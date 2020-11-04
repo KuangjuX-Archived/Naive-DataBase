@@ -96,13 +96,36 @@ PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement)
 }
 
 //Initialize Data Table
-Table* new_table(){
+Table* db_open(const char* filename){
+    Pager* pager = pager_open(filename);
+    uint32_t num_rows = pager->file_length / ROW_SIZE;
+    
     Table* table = malloc(sizeof(Table));
-    table->num_rows = 0;
-    for(uint32_t i = 0;i< TABLE_MAX_PAGES; i++){
-        table->pages[i] = NULL;
-    }
+    table->pager = pager;
+    table->num_rows= num_rows;
+
     return table;
+}
+
+Pager* pager_open(const char* filename){
+    int fd = open(filename,O_RDWR | O_CREAT, S_IWUSR | S_IRUSR);
+
+    if(fd == -1){
+        printf("Unable to open file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    off_t file_length = lseek(fd,0,SEEK_END);
+
+    Pager* pager = malloc(sizeof(pager));
+    pager->file_descriptor = fd;
+    pager->file_length = file_length;
+
+    for(uint32_t i = 0; i < TABLE_MAX_PAGES;i++){
+        pager->pages[i] = NULL;
+    }
+
+    return pager;
 }
 
 //free Data Table
@@ -116,11 +139,7 @@ void free_table(Table* table){
 
 void* row_slot(Table* table, uint32_t row_num){
     uint32_t page_num = row_num / ROWS_PER_PAGE;
-    void* page = table->pages[page_num];
-    if(page == NULL){
-        //Allocate memory only when we try to access page
-        page = table->pages[page_num] = malloc(PAGE_SIZE);
-    }
+    void* page = get_page(table->pager,page_num);
 
     uint32_t row_offset = row_num%ROWS_PER_PAGE;
     uint32_t byte_offset = row_offset * ROW_SIZE;
