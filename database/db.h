@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <errno.h>
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
@@ -113,8 +114,6 @@ Table* db_open(const char* filename);
 Pager* pager_open(const char* filename);
 
 void* get_page(Pager* pager, uint32_t page_num);
-
-void free_table(Table* table);
 
 void* row_slot(Table* table, uint32_t row_num);
 
