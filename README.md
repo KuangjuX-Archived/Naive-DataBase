@@ -1,4 +1,4 @@
-# SelfBuild
+# Self-Database
 ## Introduction
 This is my try to build my own simple database which is based on db_tutorial
 ## Config
