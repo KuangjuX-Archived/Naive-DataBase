@@ -12,7 +12,7 @@ First, you need to clone this project into your Linux machine because my program
 git clone https://github.com/KuangjuX/Self-Database.git
 cd Self-Database/database
 ```
-In this project, I provide a Makefile file , hoping to help our database programme compile and run easily.
+In this project, I provide a Makefile file , hoping to help our database programme compile and run easily. \
 So you can compile and run by executing the following commands in your terminal:
 ```
 make
