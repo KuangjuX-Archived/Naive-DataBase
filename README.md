@@ -1,6 +1,11 @@
 # SelfBuild
 ## Introduction
 This is my try to build my own simple database which is based on db_tutorial
+## Config
+```
+gcc 7.5.0
+GNU make 4.1
+```
 ## Setup
 First, you need to clone this project into your Linux machine because my programme is written and run on the Linux operating system.
 ```
