@@ -19,3 +19,7 @@ make
 make run
 ```
 And if you want to compile the programme again:, you can execute `make clean` to delete exist executable file.
+## Use
+When you execute this programme, you will see a signal `db > `  , which prints a prompt to the user. We do this before reading each line of input. \
+We assuse a structer of data table, only including id, user and email. So you can test by enter a line like this: `insert qcx qcx@tju.ecu.com` to insert a row to this table. \
+Similarly， you can also enter a line `select` to get all of data in this table.
