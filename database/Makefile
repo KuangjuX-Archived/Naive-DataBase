@@ -10,4 +10,4 @@ db.o:db.c db.h
 clean:
 	rm -rf db.o main.o main
 run:
-	./main
+	./main mydb.db
