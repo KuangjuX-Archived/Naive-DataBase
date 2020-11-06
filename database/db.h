@@ -103,11 +103,13 @@ void print_prompt();
 
 void print_row(Row* row);
 
-MetaCommandResult do_meta_command(InputBuffer* input_buffer);
+MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table);
 
 PrepareResult prepare_insert(InputBuffer* input_buffer, Statement* statement);
 
 PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement);
+
+
 
 Table* db_open(const char* filename);
 
@@ -115,7 +117,13 @@ Pager* pager_open(const char* filename);
 
 void* get_page(Pager* pager, uint32_t page_num);
 
+void db_close(Table* table);
+
+void pager_flush(Pager* pager, uint32_t page_num, uint32_t size);
+
 void* row_slot(Table* table, uint32_t row_num);
+
+
 
 ExecuteResult execute_insert(Statement* statement, Table* table);
 

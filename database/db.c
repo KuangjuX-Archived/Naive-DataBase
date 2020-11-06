@@ -39,8 +39,9 @@ void print_row(Row* row){
     printf("(%d, %s, %s)\n",row->id,row->username,row->email);
 }
 
-MetaCommandResult do_meta_command(InputBuffer* input_buffer){
+MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table){
     if(strcmp(input_buffer->buffer,".exit")==0){
+        db_close(table);
         exit(EXIT_SUCCESS);
     }else
     {
@@ -117,7 +118,7 @@ Pager* pager_open(const char* filename){
 
     off_t file_length = lseek(fd,0,SEEK_END);
 
-    Pager* pager = malloc(sizeof(pager));
+    Pager* pager = malloc(sizeof(Pager));
     pager->file_descriptor = fd;
     pager->file_length = file_length;
 
@@ -160,12 +161,72 @@ void* get_page(Pager* pager, uint32_t page_num){
 }
 
 //free Data Table
-void free_table(Table* table){
-    for(int i=0;table->pages[i];i++){
-        free(table->pages[i]);
+void db_close(Table *table){
+    Pager* pager = table->pager;
+    uint32_t num_full_pages = table->num_rows/ROWS_PER_PAGE;
+
+    for(uint32_t i =0; i<num_full_pages; i++){
+        if(pager->pages[i] == NULL){
+            continue;
+        }
+        
+        pager_flush(pager,i,PAGE_SIZE);
+        free(pager->pages[i]);
+        pager->pages[i] = NULL;
     }
 
+    //There may be a partial page to write to the end of the file
+    //This should not be needed after we switch to a B-Tree
+
+    uint32_t num_additonal_rows = table->num_rows % ROWS_PER_PAGE;
+    if(num_additonal_rows > 0){
+        uint32_t page_num = num_full_pages;
+        if(pager->pages[page_num] != NULL){
+            pager_flush(pager, page_num, num_additonal_rows*ROW_SIZE);
+            free(pager->pages[page_num]);
+            pager->pages[page_num] = NULL;
+
+        }
+    }
+
+    int result = close(pager->file_descriptor);
+    if(result == -1){
+        printf("Error closing db file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for(uint32_t i = 0; i < TABLE_MAX_PAGES; i++){
+        void* page = pager->pages[i];
+        if(page){
+            free(page);
+            pager->pages[i] = NULL;
+        }
+    }
+
+    free(pager);
     free(table);
+
+}
+
+void pager_flush(Pager* pager, uint32_t page_num, uint32_t size){
+    if(pager->pages[page_num] == NULL){
+        printf("Tried to flush null page.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    off_t offset = lseek(pager->file_descriptor, page_num*PAGE_SIZE, SEEK_SET);
+
+    if(offset == -1){
+        printf("Error seeking: %d\n",errno);
+        exit(EXIT_FAILURE);
+    }
+
+    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], size);
+
+    if(bytes_written == -1){
+        printf("Error writing: %d\n",errno);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void* row_slot(Table* table, uint32_t row_num){
